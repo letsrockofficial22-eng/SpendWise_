@@ -1,0 +1,2 @@
+import {createServerClient} from '@supabase/ssr';import {cookies} from 'next/headers';
+export async function serverClient(){const cookieStore=await cookies();const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;if(!url||!key)throw new Error('Supabase configuration missing');return createServerClient(url,key,{cookies:{getAll(){return cookieStore.getAll()},setAll(values){try{values.forEach(({name,value,options})=>cookieStore.set(name,value,options))}catch{/* Middleware refreshes cookies for Server Components. */}}}})}

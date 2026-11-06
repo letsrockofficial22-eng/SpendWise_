@@ -1,0 +1,56 @@
+# SpendWise — Supabase setup
+
+See the [SpendWise Feature Guide](./docs/SpendWise-Feature-Guide.pdf) for a 21-feature inventory and usage notes.
+
+The landing page is public; personal pages require a Supabase account. The frontend uses the user's authenticated session and the public project key, never a service-role/secret key. **No Supabase project is connected by this repository alone.** Do not use this with real financial data until the migration and RLS have been applied and independently tested on your project.
+
+See the [Supabase and Google OAuth setup guide](./docs/SpendWise-Supabase-Google-OAuth-Setup.pdf) for the migration order, Auth redirects, Google provider setup, account-deletion function deployment, and verification steps.
+
+## Create a project and run locally
+
+1. Create a project at [Supabase](https://supabase.com/), and wait for the database to become ready.
+2. In the Supabase SQL Editor, apply all migrations in order: `20261030000000_initial.sql`, `20261030000001_profile_names.sql`, `20261104000000_finance_features.sql`, `20261105000000_notifications_realtime.sql`, `20261105000001_recurring_income_and_loan_links.sql`, and `20261105000002_receipt_attachments.sql`. Alternatively, link a project using the Supabase CLI and run `supabase db push`. They create the tables, constraints, indexes, profile trigger, owner-only RLS policies, budget alert feed, Realtime publication entries, recurring-income support, loan-payment links, and private receipt bucket.
+3. In Supabase **Connect / API Keys**, copy the project URL and the **publishable** key (or legacy anon public key). Create `.env.local` and add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`. Never put a secret/service-role key here. `.env.local` is gitignored.
+4. In Supabase Authentication URL Configuration, set the Site URL to your deployed origin (for local development, `http://localhost:3000`) and add `http://localhost:3000/auth/confirm`, `http://localhost:3000/auth/callback`, and their production `https://YOUR-DOMAIN/...` equivalents to the redirect allow list. For a preview, add its exact origin and paths as well. The `/auth/confirm` page handles both the PKCE `code` flow and Supabase `token_hash` links. For confirmation links that work when opened on a different device or browser, change the **Confirm signup** email template to link to `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`. Built-in Supabase email delivery has restrictions; configure SMTP for production.
+5. Run `npm ci` then `npm run dev`. Open the landing page, select Start Tracking, create an account with your first and last name, and follow the verification email if email confirmation is enabled. Then sign in. If confirmation is disabled, sign-up can create a session immediately.
+
+### Email confirmation troubleshooting
+
+If clicking the confirmation email shows **"this site can't be reached"**, the host in the link is not reachable from the device that opened it. `localhost` only works on the machine running `npm run dev`; opening the email on a phone will fail. Use the deployed site, your computer's LAN address, or a tunnel, then add that exact origin and `/auth/confirm` to the Supabase redirect allow list and update the Site URL. After changing the URL configuration, request a new confirmation email because old links keep their original redirect host.
+
+Next.js middleware refreshes auth cookies and validates the user with `getUser()` before protected routes are served. The `/auth/confirm` page verifies the email link and exchanges the resulting code or token for a cookie-backed session. Expired or missing sessions redirect to login. RLS remains the real data security boundary, even for direct API requests.
+
+## Database security
+
+- `transactions`, `budgets`, `loans`, `recurring_bills`, and `shared_expenses` have `user_id` defaulted by the database to `auth.uid()`. RLS policies check ownership for every select, insert, update and delete, including `WITH CHECK` on updates and inserts. A client-supplied owner cannot bypass these checks.
+- `profiles.id` is the owner UUID and is protected the same way. A `SECURITY DEFINER` trigger with a fixed empty search path creates the profile using the auth user id; it only copies the sign-up display name from user metadata, truncated to the column limit. Ownership never comes from client-supplied metadata. Existing users are backfilled during the migration.
+- Tables have database constraints for money, types and bounded text. Indexes support owner/date/category queries. Monetary columns are `numeric(12,2)`; client calculations sum integer paisa. Authenticated users are isolated by database RLS, not hidden controls.
+- Run `npm run test:rls:live` with the two account environment variables below to exercise cross-account reads/writes and anonymous access against your configured project. It uses only the public key and ordinary account sessions; never use a service-role key for this test. The Vitest migration checks remain static and do not contact Supabase.
+
+## Data and behavior
+
+- New users start with empty transactions and budgets, and a default ৳300 daily budget. Add an income through the transaction form's Type selector to give the account a balance. No old localStorage data is uploaded or deleted automatically. Legacy local demo data is no longer a source of truth. `lib/mock-data.ts` retains unused mock helpers and category labels for development; no production path loads demo transactions.
+- Profile, theme, timezone, payment, and notification preferences are saved to the profile. Android loan and bill reminders are scheduled locally, one day before the due date at about 9:00 AM; Android notification permission is required and the OS may delay delivery. The profile notification switch enables/disables these reminders.
+- Daily/monthly boundaries use the account's chosen IANA timezone (default Asia/Dhaka), including for reports and transaction dates. The current UI offers a limited selection of zones; nonexistent daylight-saving wall times are rejected, while ambiguous fall-back times use one valid offset. Currency is BDT only.
+- Amounts have at most two decimals. Transaction search matches category, subcategory, description, notes, and payment method; filters include category, payment method, type, and date range. Transactions and budgets load in pages and calculations happen locally. CSV export includes the current filtered transactions. Realtime subscriptions refresh open tabs when cloud rows change; use refresh if the Realtime connection is unavailable.
+- After sign-in, transactions, budgets, loans, recurring bills, shared expense splits, and preferences are cached per account in local IndexedDB. Changes made offline are saved locally and queued for sync when connectivity returns, with no offline warning shown. Startup restores cached accounts while offline; signing out clears the remembered account. First sign-in requires internet. Local cached data and backups are not separately encrypted by the app; clearing app data or uninstalling removes unsynced changes.
+- Use the refresh button in the workspace top bar to fetch the latest cloud data when online. While offline it leaves the local data unchanged; queued changes sync automatically after reconnecting.
+- Login and sign-up forms include a show/hide password control. Record income with the dedicated **Add Income** action; income transactions increase the current balance, while expenses decrease it.
+- Password recovery is available from the sign-in page. The reset email must redirect to `/auth/callback?next=/auth/reset-password` (or the matching Android deep link); configure those redirect URLs in Supabase. Email changes are requested from the profile page and remain pending until the new address is confirmed.
+- Google sign-in is offered on the login and signup pages. Enable Google under Supabase Authentication → Providers and configure its client ID/secret and callback URL in both Supabase and Google Cloud. For Android, allow `spendwise://auth/callback` in Supabase redirects and use the registered app link.
+- Account deletion is performed by the `delete-account` Supabase Edge Function; it verifies the caller's access token and deletes the authenticated user so owner-linked rows cascade. Deploy it with `supabase functions deploy delete-account` and keep `SUPABASE_SERVICE_ROLE_KEY` only in the function's server-side secrets. Do not configure this secret in the client or `.env.local`.
+- In-app notifications currently include daily and category-budget threshold alerts. Apply the notifications migration and make sure Realtime is enabled for the listed tables. Local Android reminders for loan and recurring-item due dates continue to work independently; remote push delivery is not configured.
+- Receipt attachments accept JPG, PNG, WebP, or PDF files up to 5 MB. They use a private Supabase Storage bucket with per-user folder policies and short-lived signed URLs. Apply the receipt migration before enabling attachments.
+- The Contact us page accepts bug reports, account questions, suggestions, and other messages. Submitting opens the user's email app with a draft addressed to the app owner; the user must send that email.
+- Finance tools include loans to repay and money lent, recurring income and expenses, offline Android reminders, participant-name shared expense splits, and calendar-month income/expense summaries. Loan repayments/receipts now also create linked income/expense transactions; deleting a loan preserves its transaction history and clears the link.
+- Backup & export creates AES-GCM encrypted JSON backups using a passphrase and merges same-account backups without overwriting existing IDs. Legacy plaintext backups can still be imported. Local IndexedDB snapshots are not yet encrypted. Transaction CSV export remains available.
+- Budget `month` is supported in the database; budgets created through the current UI are recurring (month is null), and existing month-specific records are retained on edit. The overview uses the most recently created budget (daily or monthly, including its category filter) for its remaining-budget card; when no budgets exist, it falls back to the profile's default daily budget.
+- Shared expense invitations, multi-currency conversion, remote push delivery, and passphrase-encrypted local storage are not yet available. Android push also requires Firebase/FCM application credentials and device setup; these cannot be generated by the repository.
+
+## Checks
+
+Run `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`. The tests include mocked route protection, calculations, date boundaries, validation, and static migration-policy checks. To run real owner-isolation checks, configure `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `RLS_USER_A_EMAIL`, `RLS_USER_A_PASSWORD`, `RLS_USER_B_EMAIL`, and `RLS_USER_B_PASSWORD`, then run `npm run test:rls:live`. The live test uses two ordinary authenticated accounts, never a service-role key.
+
+## Android
+
+The Android wrapper embeds a static export while the normal `npm run build` remains a standard Next.js server build. See [ANDROID_SETUP.md](./ANDROID_SETUP.md) for Android Studio setup, Supabase deep-link configuration, debug APK builds, and release signing.

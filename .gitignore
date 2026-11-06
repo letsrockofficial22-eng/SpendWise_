@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.env.local
+.env.*.local
+*Client secret*.txt
+coverage/
+out/
+*.tsbuildinfo
+supabase/.temp/
+*.jks
+*.keystore
+android/keystore.properties

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SpendWise — Project Summary &amp; Feature Guide</title>
+<style>
+  :root{
+    --ink:#16241d; --muted:#5f6f66; --soft:#7d8b83;
+    --green:#1f4d3d; --sage:#438b6d; --mint:#e8f1ec; --cream:#f7f9f7;
+    --peach:#dfaa6c; --blue:#7194ad; --purple:#b294ba; --line:#dce5df;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{
+    margin:0;color:var(--ink);background:#fff;
+    font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    font-size:10pt;line-height:1.55;
+  }
+  @page{size:A4;margin:15mm 14mm 16mm}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    position:relative;width:210mm;height:297mm;overflow:hidden;
+    margin:-15mm -14mm -16mm;padding:22mm 18mm;
+    color:#fff;page-break-after:always;
+    background:linear-gradient(145deg,#173c30 0%,#1f4d3d 48%,#2c6350 100%);
+  }
+  .cover:before,.cover:after{content:"";position:absolute;border-radius:50%}
+  .cover:before{width:120mm;height:120mm;right:-38mm;top:-30mm;background:rgba(255,255,255,.055)}
+  .cover:after{width:82mm;height:82mm;right:8mm;bottom:-30mm;background:rgba(223,170,108,.14)}
+  .cover .grain{position:absolute;inset:0;background:radial-gradient(circle at 15% 85%,rgba(223,170,108,.10),transparent 55%)}
+  .cover-top{position:relative;display:flex;align-items:center;justify-content:space-between;z-index:2}
+  .brand{display:flex;align-items:center;gap:9px;font-size:20pt;font-weight:700;letter-spacing:-.03em}
+  .brand .mark{
+    width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.14);
+    border:1px solid rgba(255,255,255,.24);display:flex;align-items:center;justify-content:center;
+    font-size:15pt;font-weight:800;
+  }
+  .brand .dot{color:var(--peach)}
+  .doc-label{font-size:8pt;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.62);font-weight:700}
+  .cover-main{position:relative;z-index:2;margin-top:58mm;max-width:156mm}
+  .cover-kicker{font-size:8.5pt;letter-spacing:.28em;text-transform:uppercase;color:var(--peach);font-weight:700;margin-bottom:7mm}
+  .cover h1{font-size:44pt;line-height:1.02;letter-spacing:-.045em;margin:0 0 7mm;font-weight:750}
+  .cover h1 .accent{color:#a9d4bd}
+  .cover-sub{font-size:14pt;line-height:1.45;color:rgba(255,255,255,.82);margin:0 0 10mm;max-width:138mm}
+  .cover-rule{width:26mm;height:2px;background:var(--peach);margin-bottom:9mm}
+  .cover-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .cover-tag{
+    font-size:8pt;font-weight:600;letter-spacing:.03em;padding:4px 10px;border-radius:999px;
+    background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.86)
+  }
+  .cover-meta{
+    position:absolute;left:18mm;right:18mm;bottom:18mm;z-index:2;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:6mm;
+    padding-top:7mm;border-top:1px solid rgba(255,255,255,.18)
+  }
+  .cover-meta span{display:block;font-size:7pt;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:2mm}
+  .cover-meta b{font-size:9.5pt;font-weight:600;color:rgba(255,255,255,.94);line-height:1.35}
+  .cover-foot{position:absolute;left:18mm;bottom:9mm;z-index:2;font-size:7.5pt;color:rgba(255,255,255,.45);letter-spacing:.08em}
+
+  /* ---------- Flow / sections ---------- */
+  .section{break-before:page}
+  .section.flow{break-before:auto}
+  .section.detail{break-before:auto;padding-top:3mm}
+  h2.section-title,h3,.section-num,.lead{break-after:avoid}
+  .section-title{font-size:24pt;line-height:1.1;letter-spacing:-.035em;margin:0 0 2mm;font-weight:750;color:var(--green)}
+  .section-num{font-size:8pt;letter-spacing:.24em;text-transform:uppercase;color:var(--sage);font-weight:700;margin-bottom:3mm}
+  .lead{font-size:11pt;line-height:1.6;color:var(--muted);margin:0 0 5mm;max-width:170mm}
+  h3{font-size:13.5pt;line-height:1.25;letter-spacing:-.02em;margin:7mm 0 2.5mm;color:var(--green);font-weight:700}
+  h3.first{margin-top:3mm}
+  h4{font-size:10.2pt;margin:0;color:var(--ink);font-weight:700}
+  p{margin:0 0 2.5mm}
+  .small{font-size:8.6pt;color:var(--muted)}
+  .muted{color:var(--muted)}
+  .toc{display:grid;grid-template-columns:1fr 1fr;gap:2px 10mm;margin:4mm 0 8mm}
+  .toc div{display:flex;align-items:center;gap:3mm;padding:2.2mm 0;border-bottom:1px solid var(--line);font-size:9.2pt}
+  .toc b{color:var(--sage);font-size:8pt;letter-spacing:.08em;min-width:8mm}
+  .toc span{color:var(--ink)}
+  .toc em{margin-left:auto;color:var(--soft);font-style:normal;font-size:8pt}
+
+  /* ---------- Cards / grids ---------- */
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:3.5mm}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:3.5mm}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm}
+  .card{
+    border:1px solid var(--line);border-radius:9px;padding:4mm 4.5mm;background:#fff;
+    break-inside:avoid;
+  }
+  .card.tint{background:var(--cream)}
+  .card h4{margin-bottom:1.5mm}
+  .card p{font-size:9.1pt;color:var(--muted);margin:0}
+  .stat{
+    border:1px solid var(--line);border-radius:9px;padding:3.5mm 4mm;background:var(--cream);break-inside:avoid;
+  }
+  .stat span{display:block;font-size:7.2pt;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);font-weight:700;margin-bottom:1.5mm}
+  .stat b{font-size:15pt;letter-spacing:-.03em;color:var(--green);line-height:1.1}
+  .stat small{display:block;font-size:8pt;color:var(--muted);margin-top:1mm}
+
+  /* ---------- Feature cards ---------- */
+  .feature{
+    border:1px solid var(--line);border-left:3.5px solid var(--sage);border-radius:8px;
+    padding:3.4mm 4mm 3.6mm;margin:0 0 3mm;background:#fff;break-inside:avoid;
+  }
+  .feature .fh{display:flex;align-items:baseline;gap:3mm;margin-bottom:1.6mm}
+  .feature .fnum{
+    flex:0 0 auto;font-size:7.5pt;font-weight:800;color:#fff;background:var(--sage);
+    border-radius:5px;padding:1px 5px;letter-spacing:.04em;
+  }
+  .feature h4{flex:1}
+  .feature p{font-size:9.1pt;color:#40534a;margin:0 0 1.5mm}
+  .feature ul{margin:1mm 0 0 4.5mm;padding:0}
+  .feature li{font-size:8.8pt;color:var(--muted);margin:0 0 1mm}
+  .feature li b{color:#34483e;font-weight:600}
+
+  /* ---------- Chips ---------- */
+  .chip{
+    display:inline-block;font-size:6.7pt;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    padding:1px 6px;border-radius:999px;background:var(--mint);color:var(--green);
+    border:1px solid #cfe1d7;vertical-align:middle;white-space:nowrap;
+  }
+  .chip.partial{background:#fdf3e6;color:#8a5a1c;border-color:#f0dcc0}
+  .chip.none{background:#eef1f5;color:#5a6573;border-color:#dde3ea}
+
+  /* ---------- Tables ---------- */
+  table{width:100%;border-collapse:collapse;font-size:8.4pt;margin:2mm 0 4mm}
+  thead{display:table-header-group}
+  th{
+    background:var(--green);color:#fff;text-align:left;padding:2.4mm 2.6mm;
+    font-size:7.2pt;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  }
+  td{border-bottom:1px solid var(--line);padding:2.1mm 2.6mm;vertical-align:top;color:#3c4f45}
+  tr:nth-child(even) td{background:#fbfcfb}
+  td b{color:var(--ink)}
+  .compact td{padding:1.7mm 2.4mm;font-size:8.1pt}
+  .num{text-align:center;color:var(--soft);font-weight:700}
+  .module-row td{background:var(--mint)!important;color:var(--green);font-weight:800;font-size:7.6pt;letter-spacing:.1em;text-transform:uppercase;padding:1.8mm 2.6mm}
+
+  /* ---------- Flow diagram ---------- */
+  .flow{display:flex;align-items:stretch;gap:2.5mm;margin:3mm 0 4mm}
+  .flow-node{
+    flex:1;border:1px solid var(--line);border-radius:8px;padding:3mm;background:var(--cream);
+    text-align:center;break-inside:avoid;
+  }
+  .flow-node b{display:block;font-size:8.6pt;color:var(--green);margin-bottom:1mm}
+  .flow-node span{display:block;font-size:7.4pt;color:var(--muted);line-height:1.4}
+  .flow-arrow{display:flex;align-items:center;justify-content:center;color:var(--sage);font-size:13pt;font-weight:700;flex:0 0 5mm}
+
+  /* ---------- Callouts ---------- */
+  .callout{
+    border:1px solid #e9d8bd;background:#fdf8f0;border-radius:8px;padding:3.5mm 4mm;
+    font-size:9pt;color:#6d5226;break-inside:avoid;margin:3mm 0;
+  }
+  .callout b{color:#5a421c}
+  .callout.green{border-color:#cfe1d7;background:#f2f8f4;color:#315444}
+  .callout.green b{color:var(--green)}
+
+  /* ---------- Timelines ---------- */
+  .steps{counter-reset:step;margin:2mm 0 3mm}
+  .step{
+    position:relative;padding:2.6mm 3mm 2.6mm 12mm;border:1px solid var(--line);
+    border-radius:8px;margin-bottom:2.2mm;background:#fff;break-inside:avoid;font-size:9pt;color:var(--muted)
+  }
+  .step:before{
+    counter-increment:step;content:counter(step);
+    position:absolute;left:3mm;top:2.4mm;width:6mm;height:6mm;border-radius:50%;
+    background:var(--green);color:#fff;font-size:7.5pt;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step b{color:var(--ink);display:block;margin-bottom:.6mm;font-size:9.2pt}
+
+  .divider{height:1px;background:var(--line);margin:6mm 0}
+  .footer-note{
+    margin-top:8mm;padding-top:4mm;border-top:1px solid var(--line);
+    font-size:7.6pt;color:var(--soft);display:flex;justify-content:space-between;gap:6mm
+  }
+  .avoid{break-inside:avoid}
+  .page-break{break-before:page}
+</style>
+</head>
+<body>
+
+<!-- ================= COVER ================= -->
+<section class="cover">
+  <div class="grain"></div>
+  <div class="cover-top">
+    <div class="brand"><span class="mark">S</span> spendwise<span class="dot">.</span></div>
+    <div class="doc-label">Project Documentation</div>
+  </div>
+
+  <div class="cover-main">
+    <div class="cover-kicker">Personal finance, made clear</div>
+    <h1>Make every<br><span class="accent">taka count.</span></h1>
+    <div class="cover-rule"></div>
+    <p class="cover-sub">SpendWise is an offline-first expense tracker and personal finance workspace for students — built for the web with Next.js and shipped to Android with Capacitor, backed by Supabase.</p>
+    <div class="cover-tags">
+      <span class="cover-tag">Next.js 15 · React 19</span>
+      <span class="cover-tag">Supabase Auth + Postgres</span>
+      <span class="cover-tag">Capacitor 8 · Android</span>
+      <span class="cover-tag">Offline-first · IndexedDB</span>
+      <span class="cover-tag">BDT (৳)</span>
+    </div>
+  </div>
+
+  <div class="cover-meta">
+    <div><span>Document</span><b>Project Summary<br>&amp; Feature Guide</b></div>
+    <div><span>Version</span><b>1.0<br>November 5, 2026</b></div>
+    <div><span>Platforms</span><b>Web + Android<br>Responsive UI</b></div>
+    <div><span>Features covered</span><b>35 documented<br>7 modules</b></div>
+  </div>
+  <div class="cover-foot">SPENDWISE · SOURCE-BASED PROJECT REPORT</div>
+</section>
+
+<!-- ================= CONTENTS + AT A GLANCE ================= -->
+<section class="section">
+  <div class="section-num">Overview</div>
+  <h2 class="section-title">Project at a glance</h2>
+  <p class="lead">A student-focused money workspace that records spending, plans budgets, explains habits, and keeps working when the internet does not.</p>
+
+  <div class="toc">
+    <div><b>01</b><span>Project at a glance</span><em>Context</em></div>
+    <div><b>02</b><span>Technology &amp; architecture</span><em>How it is built</em></div>
+    <div><b>03</b><span>Feature inventory</span><em>35 features</em></div>
+    <div><b>04</b><span>Feature details</span><em>What each one does</em></div>
+    <div><b>05</b><span>Data model &amp; security</span><em>Storage &amp; RLS</em></div>
+    <div><b>06</b><span>Offline-first &amp; sync</span><em>Local-first behavior</em></div>
+    <div><b>07</b><span>Android distribution</span><em>Capacitor build</em></div>
+    <div><b>08</b><span>Quality &amp; testing</span><em>Automated checks</em></div>
+    <div><b>09</b><span>Limitations &amp; next steps</span><em>Honest scope</em></div>
+    <div><b>10</b><span>Quick start</span><em>Run it yourself</em></div>
+  </div>
+
+  <h3 class="first">What SpendWise is</h3>
+  <p><b>SpendWise</b> is a personal finance and expense-tracking application designed around everyday student spending in Bangladesh. It records income and expenses in Bangladeshi taka (BDT), tracks daily and monthly budgets, turns transactions into charts and reports, and bundles practical tools: loans to repay or money lent, recurring bills, shared expense splits, monthly summaries, and full-account backup and restore.</p>
+  <p>It runs as a <b>responsive web app</b> built with Next.js, React, and TypeScript, and as an <b>Android app</b> packaged with Capacitor. <b>Supabase</b> supplies authentication and cloud PostgreSQL storage. The app is deliberately <b>offline-first</b>: each signed-in account has a local snapshot in IndexedDB, edits are shown immediately, queued, and synchronized when a connection returns.</p>
+
+  <h3>At a glance</h3>
+  <div class="grid-4">
+    <div class="stat"><span>Product</span><b>SpendWise</b><small>Student finance tracker</small></div>
+    <div class="stat"><span>Platforms</span><b>Web + Android</b><small>One shared codebase</small></div>
+    <div class="stat"><span>Currency</span><b>BDT ৳</b><small>Two-decimal precision</small></div>
+    <div class="stat"><span>Features</span><b>35</b><small>Across 7 modules</small></div>
+    <div class="stat"><span>Cloud</span><b>Supabase</b><small>Auth + Postgres + RLS</small></div>
+    <div class="stat"><span>Local data</span><b>IndexedDB</b><small>Per-account cache + queue</small></div>
+    <div class="stat"><span>Android</span><b>SDK 24–36</b><small>Java 21 build</small></div>
+    <div class="stat"><span>Tests</span><b>8 suites</b><small>Vitest + static RLS</small></div>
+  </div>
+
+  <h3>Who it is for</h3>
+  <p>SpendWise is aimed at students and young adults who want a lightweight, friendly way to understand daily cash flow. The interface is written for that audience — “Student account”, “Pocket money”, campus-oriented categories, and a calm, low-pressure visual tone. The default time zone is <b>Asia/Dhaka</b>, and the only supported currency is BDT.</p>
+
+  <div class="callout green">
+    <b>Status:</b> the application code, database migrations, and Android wrapper are present. To use it with real data, you must create your own Supabase project, apply the three migrations, set the two public environment variables, and verify Row Level Security with two real accounts. The repository alone does not connect to a Supabase project.
+  </div>
+</section>
+
+<!-- ================= TECH & ARCHITECTURE ================= -->
+<section class="section">
+  <div class="section-num">02 · How it is built</div>
+  <h2 class="section-title">Technology &amp; architecture</h2>
+  <p class="lead">A single TypeScript codebase serves two targets: a standard Next.js server build for the website, and a static export embedded inside the Android APK. <span class="muted">npm run build</span> produces the server build; <span class="muted">npm run build:android</span> sets <b>CAPACITOR_BUILD=1</b> and writes the export to <b>out/</b>, which is synced into the Android project and should not be deployed as the website.</p>
+
+  <table class="compact">
+    <thead><tr><th style="width:20%">Layer</th><th style="width:33%">Technology</th><th>Role in SpendWise</th></tr></thead>
+    <tbody>
+      <tr><td><b>Presentation</b></td><td>Next.js 15 App Router, React 19, TypeScript 5.7</td><td>Routing, protected workspace, forms, feature pages, type safety.</td></tr>
+      <tr><td><b>Styling &amp; charts</b></td><td>Tailwind CSS 3.4 + custom CSS, lucide-react, Recharts</td><td>Responsive app shell, icons, area chart, donut breakdown, progress bars.</td></tr>
+      <tr><td><b>Auth &amp; cloud data</b></td><td>Supabase Auth, PostgreSQL, Row Level Security; @supabase/supabase-js 2.89, @supabase/ssr 0.8</td><td>Email/password accounts, profile, six owner-scoped tables, cloud sync.</td></tr>
+      <tr><td><b>Offline layer</b></td><td>IndexedDB database <span class="muted">spendwise-offline</span>, localStorage account pointer</td><td>Per-account snapshot, pending change queue, offline session restore.</td></tr>
+      <tr><td><b>Android</b></td><td>Capacitor 8: app, browser, filesystem, keyboard, local-notifications, network, share, splash-screen, status-bar</td><td>Native shell, deep links, reminders, share sheet, back handling, status bar.</td></tr>
+      <tr><td><b>Quality</b></td><td>Vitest 4, ESLint 9, <span class="muted">tsc --noEmit</span>, Next build</td><td>Unit tests, static policy checks, type checking, linting, production build.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="first">Runtime architecture</h3>
+  <div class="flow">
+    <div class="flow-node"><b>UI</b><span>AppShell, dashboard, transactions, budgets, reports, finance tools</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><b>StoreProvider</b><span>Single source of truth, preferences, offline queue, sync triggers</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><b>IndexedDB</b><span>Instant local reads/writes, per-account snapshot, pending changes</span></div>
+    <div class="flow-arrow">⇄</div>
+    <div class="flow-node"><b>Supabase</b><span>Auth session, Postgres tables, RLS ownership checks</span></div>
+  </div>
+  <p class="small">The Capacitor plugin layer sits beside the store: network status drives sync, local notifications deliver reminders, and filesystem + share handle CSV/JSON export on Android.</p>
+
+  <h3>Repository map</h3>
+  <table class="compact">
+    <thead><tr><th style="width:24%">Path</th><th>What lives there</th></tr></thead>
+    <tbody>
+      <tr><td><b>app/</b></td><td>Routes for dashboard, transactions, budgets, reports, loans, shared expenses, monthly summary, backup, settings, profile, notifications, login, signup, auth confirmation, about, contact.</td></tr>
+      <tr><td><b>components/</b></td><td><span class="muted">app-shell.tsx</span> (workspace UI), <span class="muted">store.tsx</span> (state + sync), <span class="muted">new-features.tsx</span> (loans, bills, splits, summary, backup), <span class="muted">auth-form.tsx</span>, <span class="muted">native-runtime.tsx</span>.</td></tr>
+      <tr><td><b>lib/</b></td><td>Calculations, date/time-zone helpers, data access, offline storage, backup, CSV export, reminders, validation, search, auth routing, contact mailto.</td></tr>
+      <tr><td><b>supabase/migrations/</b></td><td>Three SQL migrations: initial schema + RLS, profile names, finance feature tables.</td></tr>
+      <tr><td><b>types/</b></td><td>Shared TypeScript models for transactions, budgets, loans, bills, shared expenses, preferences.</td></tr>
+      <tr><td><b>tests/</b></td><td>Eight Vitest suites covering calculations, dates, backup, offline replay, finance helpers, auth routing, contact, budget selection, static RLS checks.</td></tr>
+      <tr><td><b>android/</b></td><td>Generated Capacitor Android project, Gradle build, app id <span class="muted">com.yourdomain.spendwise</span>.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================= FEATURE INVENTORY ================= -->
+<section class="section">
+  <div class="section-num">03 · Feature inventory</div>
+  <h2 class="section-title">Everything the app can do</h2>
+  <p class="lead">Thirty-five features across seven modules. “Implemented” means the path exists in the current source; “Partial” means the feature works but has a documented boundary.</p>
+
+  <table class="compact">
+    <thead><tr><th style="width:5%">#</th><th style="width:42%">Feature</th><th style="width:38%">Module</th><th style="width:15%">Status</th></tr></thead>
+    <tbody>
+      <tr class="module-row"><td colspan="4">Accounts &amp; access</td></tr>
+      <tr><td class="num">01</td><td><b>Email/password registration</b> with first and last name</td><td>Accounts</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">02</td><td><b>Sign-in with show/hide password</b></td><td>Accounts</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">03</td><td><b>Email confirmation</b> for web and Android deep links</td><td>Accounts</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">04</td><td><b>Protected workspace</b> and session handling</td><td>Accounts</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">05</td><td><b>Offline session restore</b> after a previous sign-in</td><td>Accounts</td><td><span class="chip">Implemented</span></td></tr>
+
+      <tr class="module-row"><td colspan="4">Dashboard &amp; insights</td></tr>
+      <tr><td class="num">06</td><td><b>Overview dashboard</b> with selectable date</td><td>Dashboard</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">07</td><td><b>Seven-day spending activity</b> area chart</td><td>Dashboard</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">08</td><td><b>Spending breakdown</b> donut by category</td><td>Dashboard</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">09</td><td><b>Recent transactions</b> and budget check-in card</td><td>Dashboard</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">10</td><td><b>Spending insights</b> for daily, weekly, monthly periods</td><td>Reports</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">11</td><td><b>Monthly summary</b> with income, expenses, net, categories</td><td>Reports</td><td><span class="chip">Implemented</span></td></tr>
+
+      <tr class="module-row"><td colspan="4">Transactions</td></tr>
+      <tr><td class="num">12</td><td><b>Add income or expense</b> with categories and payment methods</td><td>Transactions</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">13</td><td><b>Edit and delete</b> transactions with confirmation</td><td>Transactions</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">14</td><td><b>Search</b> across five fields</td><td>Transactions</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">15</td><td><b>Filters and sorting</b> with day grouping</td><td>Transactions</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">16</td><td><b>CSV export</b> of the current filtered view</td><td>Transactions</td><td><span class="chip">Implemented</span></td></tr>
+
+      <tr class="module-row"><td colspan="4">Budgets</td></tr>
+      <tr><td class="num">17</td><td><b>Create, edit, delete budgets</b> — daily or monthly, optional category</td><td>Budgets</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">18</td><td><b>Budget progress</b> with on-track, warning, and exceeded states</td><td>Budgets</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">19</td><td><b>Default daily budget</b> fallback and latest-budget selection</td><td>Budgets</td><td><span class="chip">Implemented</span></td></tr>
+
+      <tr class="module-row"><td colspan="4">Finance tools</td></tr>
+      <tr><td class="num">20</td><td><b>Loans to repay</b> and <b>money lent</b></td><td>Finance tools</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">21</td><td><b>Partial loan payments</b> and balance settlement</td><td>Finance tools</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">22</td><td><b>Recurring bills</b> — weekly, monthly, yearly</td><td>Finance tools</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">23</td><td><b>Mark bill paid</b> — creates an expense and advances the date</td><td>Finance tools</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">24</td><td><b>Shared expense splits</b> with settlement tracking</td><td>Finance tools</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">25</td><td><b>Android local reminders</b> one day before a due date</td><td>Finance tools</td><td><span class="chip">Implemented</span></td></tr>
+
+      <tr class="module-row"><td colspan="4">Data &amp; personalization</td></tr>
+      <tr><td class="num">26</td><td><b>Full JSON backup export</b> of records and preferences</td><td>Data</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">27</td><td><b>Backup restore</b> with validation and merge-by-ID</td><td>Data</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">28</td><td><b>Settings</b> — theme, week start, daily budget, payment method, notifications, time zone</td><td>Personalization</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">29</td><td><b>Profile</b> — display name, email, sign out</td><td>Personalization</td><td><span class="chip">Implemented</span></td></tr>
+
+      <tr class="module-row"><td colspan="4">Platform &amp; support</td></tr>
+      <tr><td class="num">30</td><td><b>Offline-first storage</b> and queued background sync</td><td>Platform</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">31</td><td><b>Manual refresh</b> from the workspace top bar</td><td>Platform</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">32</td><td><b>Android native shell</b> — status bar, splash, back, keyboard, links, share</td><td>Platform</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">33</td><td><b>Contact us</b> form that opens the user’s email app</td><td>Support</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">34</td><td><b>About page</b> with personal story and education</td><td>Support</td><td><span class="chip">Implemented</span></td></tr>
+      <tr><td class="num">35</td><td><b>Notifications page</b> — in-app notification centre</td><td>Support</td><td><span class="chip partial">Placeholder</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <b>Reading the status:</b> the notifications page is intentionally an empty state — in-app notification delivery is not implemented. Android loan and bill reminders are a separate, working feature. See section 09 for the full limitations list.
+  </div>
+</section>
+
+<!-- ================= FEATURE DETAILS: ACCOUNTS ================= -->
+<section class="section">
+  <div class="section-num">04 · Feature details</div>
+  <h2 class="section-title">Accounts &amp; access</h2>
+  <p class="lead">A password-based account system built on Supabase Auth, with a web confirmation flow and a dedicated Android deep link.</p>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">01</span><h4>Email/password registration with identity</h4><span class="chip">Implemented</span></div>
+    <p>The sign-up form collects first name, last name, email, and a password of at least six characters. Both names are required before the request is sent.</p>
+    <ul>
+      <li><b>Stored metadata:</b> Supabase receives <span class="muted">first_name</span>, <span class="muted">last_name</span>, and a combined <span class="muted">full_name</span>.</li>
+      <li><b>Profile creation:</b> a database trigger creates the profile row and copies the sign-up name, truncated to 100 characters.</li>
+      <li><b>Confirmation redirect:</b> web signs up redirect to <span class="muted">/auth/confirm</span>; Android uses <span class="muted">spendwise://auth/confirm</span>.</li>
+      <li><b>No duplicate-name logic:</b> names are display data, not unique identifiers — the email is the account key.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">02</span><h4>Sign-in with show/hide password</h4><span class="chip">Implemented</span></div>
+    <p>Returning users sign in with email and password. A password-visibility control switches between masked and plain text and announces its state to assistive technology.</p>
+    <ul>
+      <li><b>Safe redirect:</b> an optional <span class="muted">?next=</span> target is accepted only when it starts with a single <span class="muted">/</span> — protocol-relative and backslash paths are rejected.</li>
+      <li><b>Error handling:</b> failures are shown inline; verification and credential problems are not leaked as account-existence details.</li>
+      <li><b>Session:</b> Supabase manages the session; the app routes to the dashboard on success.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">03</span><h4>Email confirmation for web and Android</h4><span class="chip">Implemented</span></div>
+    <p>The <span class="muted">/auth/confirm</span> page accepts every confirmation shape Supabase can return and exchanges it for a session.</p>
+    <ul>
+      <li><b>PKCE code:</b> <span class="muted">?code=</span> is exchanged with <span class="muted">exchangeCodeForSession</span>.</li>
+      <li><b>Token hash:</b> <span class="muted">?token_hash=&amp;type=</span> is verified with <span class="muted">verifyOtp</span> for signup, invite, magic link, recovery, email change, and email.</li>
+      <li><b>Hash tokens:</b> access and refresh tokens in the URL fragment are installed with <span class="muted">setSession</span>.</li>
+      <li><b>URL hygiene:</b> after success the query/hash is removed with <span class="muted">history.replaceState</span>.</li>
+      <li><b>Android:</b> the native runtime catches <span class="muted">spendwise://auth/confirm</span> links and forwards them to the confirmation page.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">04</span><h4>Protected workspace and session handling</h4><span class="chip">Implemented</span></div>
+    <p>All personal pages are guarded in the client store. If no valid session exists, the user is redirected to sign-in with a reason code and personal data is cleared from memory.</p>
+    <ul>
+      <li><b>Auth listener:</b> <span class="muted">onAuthStateChange</span> reacts to sign-in and sign-out, clearing state and protecting against account switching.</li>
+      <li><b>Defense in depth:</b> UI guards are convenience only — <b>Row Level Security is the real boundary</b> for every read and write.</li>
+      <li><b>Session timeout:</b> session checks are wrapped with a timeout so a stalled network call does not hang the workspace.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">05</span><h4>Offline session restore</h4><span class="chip">Implemented</span></div>
+    <p>After a successful sign-in, the account ID is remembered locally. If the app is opened without a connection, the cached account is restored instead of forcing a login that cannot complete.</p>
+    <ul>
+      <li><b>Conditions:</b> a remembered account, a readable local snapshot, and a network/session failure. First sign-in still requires the internet.</li>
+      <li><b>Sign-out:</b> clears the remembered account pointer, so a shared device does not reopen the previous workspace.</li>
+      <li><b>Expired sessions:</b> <span class="muted">canRestoreOfflineSession</span> allows offline access while the device is disconnected, while online failures still require a valid session.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= DASHBOARD & INSIGHTS ================= -->
+<section class="section detail">
+  <div class="section-num">04 · Feature details</div>
+  <h2 class="section-title">Dashboard &amp; insights</h2>
+  <p class="lead">The first screen answers four questions: what do I have, what did I spend today, how is my budget doing, and where is the money going?</p>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">06</span><h4>Overview dashboard with selectable date</h4><span class="chip">Implemented</span></div>
+    <p>A time-aware greeting, a date picker, and four headline statistics make up the top of the workspace.</p>
+    <ul>
+      <li><b>Current balance:</b> all income minus all expenses, considering only transactions at or before “now”.</li>
+      <li><b>Today’s expenses:</b> spending on the selected date, not merely the calendar date.</li>
+      <li><b>Budget remaining:</b> the most recently created budget (daily or monthly, with its category filter) or the profile default.</li>
+      <li><b>Monthly expenses:</b> the selected month’s total, future transactions excluded.</li>
+      <li><b>Quick actions:</b> “Add Expense” and “Add Income” open the same form in the correct mode.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">07</span><h4>Seven-day spending activity chart</h4><span class="chip">Implemented</span></div>
+    <p>A Recharts area chart shows the last seven days ending on the selected date, with a total for that window and a smooth green gradient.</p>
+    <p class="small">The chart is generated from local transaction data, so it still renders offline; values are recalculated when the date changes.</p>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">08</span><h4>Spending breakdown donut</h4><span class="chip">Implemented</span></div>
+    <p>A donut chart breaks the selected month’s expenses down by category, with the total spent in the centre and a four-item legend showing each category’s percentage.</p>
+    <p class="small">Categories use consistent colours and icons — Transport, Food &amp; Drinks, Education, Mobile &amp; Internet, Shopping, Personal Care, Entertainment, Cigarettes, Other.</p>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">09</span><h4>Recent transactions and budget check-in</h4><span class="chip">Implemented</span></div>
+    <p>The bottom row combines a five-item “Recent transactions” list with a larger budget card.</p>
+    <ul>
+      <li><b>Recent list:</b> latest five records, with edit and delete actions inline and a link to the full transaction page.</li>
+      <li><b>Budget card:</b> spent vs. limit, progress bar, percentage used, money left or over, and a contextual message.</li>
+      <li><b>Tone:</b> encouraging when on track, cautionary near the limit, and direct when over budget.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">10</span><h4>Spending insights for three periods</h4><span class="chip">Implemented</span></div>
+    <p>The Reports page compares the current daily, weekly, or monthly period with the immediately preceding one.</p>
+    <ul>
+      <li><b>Four statistics:</b> total expenses, total income, average daily spending, and the previous period’s expenses.</li>
+      <li><b>Change indicator:</b> the percentage more or less than the previous period, or “No previous spending”.</li>
+      <li><b>Category ranking:</b> each category with an amount, a share-of-spending bar, and a percentage.</li>
+      <li><b>Insight card:</b> names the biggest category and its share, then shows income, expenses, and net for the period.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">11</span><h4>Monthly summary</h4><span class="chip">Implemented</span></div>
+    <p>A focused calendar-month report with a month picker, independent of the dashboard date.</p>
+    <ul>
+      <li><b>Headline figures:</b> income, expenses, net change, and transaction count.</li>
+      <li><b>Category totals:</b> sorted descending with proportional bars relative to total expenses.</li>
+      <li><b>Accurate boundaries:</b> uses the first and last day of the selected calendar month, including leap years.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= TRANSACTIONS ================= -->
+<section class="section detail">
+  <div class="section-num">04 · Feature details</div>
+  <h2 class="section-title">Transactions</h2>
+  <p class="lead">The core ledger: enter money in and out quickly, find any record, and take the filtered view with you as a spreadsheet.</p>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">12</span><h4>Add income or expense</h4><span class="chip">Implemented</span></div>
+    <p>One form handles both directions, with validation before anything is saved.</p>
+    <ul>
+      <li><b>Amount:</b> required, greater than zero, at most two decimals; quick buttons for ৳10, ৳20, ৳50, and ৳100.</li>
+      <li><b>Type:</b> Expense or Income. Switching to income suggests “Pocket money”; switching back restores “Food &amp; Drinks”.</li>
+      <li><b>Category:</b> Transport, Food &amp; Drinks, Education, Mobile &amp; Internet, Shopping, Personal Care, Entertainment, Cigarettes, Other; income adds Pocket money.</li>
+      <li><b>Subcategory:</b> optional — Bus, Rickshaw, CNG, Tea, Snacks, Lunch, Dinner, Photocopy, Mobile data, Cigarettes.</li>
+      <li><b>Payment method:</b> cash, bKash, Nagad, bank, or other. The preferred method is preselected from settings.</li>
+      <li><b>Description, date/time, and notes:</b> optional description and notes; the date and time are converted from the chosen time zone to an absolute timestamp.</li>
+      <li><b>Errors:</b> invalid amounts, missing dates, and nonexistent daylight-saving wall times are rejected with a readable message.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">13</span><h4>Edit and delete with confirmation</h4><span class="chip">Implemented</span></div>
+    <p>Every row exposes edit and delete controls. Editing opens the same form prefilled; deleting opens a modal that names the transaction and warns that removal is permanent. Both actions update the local snapshot first and queue a sync.</p>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">14</span><h4>Search across five fields</h4><span class="chip">Implemented</span></div>
+    <p>The search box performs a case-insensitive substring match across <b>category, subcategory, description, notes, and payment method</b>. This means a search for “class” can find a note, and “bkash” finds the payment method, without a separate mode.</p>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">15</span><h4>Filters, sorting, and day grouping</h4><span class="chip">Implemented</span></div>
+    <ul>
+      <li><b>Filters:</b> category, payment method, type (expenses/income), and a from/to date range.</li>
+      <li><b>Sorting:</b> newest first, oldest first, or highest amount.</li>
+      <li><b>Grouping:</b> results are grouped by day with a heading, “Today” where relevant, and a daily expense/income subtotal.</li>
+      <li><b>Result count:</b> the header reports how many transactions match, with a helpful empty state when nothing does.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">16</span><h4>CSV export of the filtered view</h4><span class="chip">Implemented</span></div>
+    <p>The export button writes the <b>current filtered and sorted list</b>, not all records. Columns: Date, Type, Category, Subcategory, Description, Payment method, Amount (BDT), Notes.</p>
+    <ul>
+      <li><b>Safe output:</b> values are quoted and escaped; leading formula characters (=, +, @, -) are neutralised to reduce spreadsheet injection.</li>
+      <li><b>Web:</b> downloads <span class="muted">spendwise-transactions.csv</span>.</li>
+      <li><b>Android:</b> writes to the app cache and opens the native share sheet.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= BUDGETS ================= -->
+<section class="section detail">
+  <div class="section-num">04 · Feature details</div>
+  <h2 class="section-title">Budgets</h2>
+  <p class="lead">Simple limits that answer “Can I still spend?” without requiring a full envelope-budgeting system.</p>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">17</span><h4>Daily and monthly budgets with optional category</h4><span class="chip">Implemented</span></div>
+    <p>Each budget has a name, an amount, a period (daily or monthly), and an optional category filter. A budget named “Food &amp; Drinks” with that category only counts food spending; leaving the category empty counts everything.</p>
+    <ul>
+      <li><b>Create:</b> name and positive amount are required; period defaults to monthly.</li>
+      <li><b>Edit:</b> all fields can change; the original record is updated by ID.</li>
+      <li><b>Delete:</b> removes the budget without touching transactions; the default daily budget remains in settings.</li>
+      <li><b>Database support:</b> a month-specific budget column exists and is preserved on edit, but budgets created in the current UI are recurring.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">18</span><h4>Progress states and remaining amount</h4><span class="chip">Implemented</span></div>
+    <p>Each card shows spent vs. limit, a progress bar, the percentage used, and the remaining or over-budget amount.</p>
+    <ul>
+      <li><b>On track:</b> below 80% of the limit.</li>
+      <li><b>Approaching limit:</b> 80–99%, with a caution colour.</li>
+      <li><b>Budget exceeded:</b> 100% or more, with the over-budget amount.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">19</span><h4>Default daily budget and latest-budget selection</h4><span class="chip">Implemented</span></div>
+    <p>The overview card chooses the <b>most recently created budget</b> and respects its period and category. If no budgets exist, it falls back to the profile’s default daily budget (৳300 for a new account).</p>
+    <ul>
+      <li><b>What counts:</b> only transactions at or before “now” — future-dated records do not inflate spending.</li>
+      <li><b>Daily budgets:</b> count the selected day; monthly budgets count the selected month.</li>
+      <li><b>Category budgets:</b> count only that category, so a food budget does not absorb transport costs.</li>
+    </ul>
+  </div>
+
+  <div class="callout">
+    <b>Design choice:</b> budgets are intentionally lightweight. There is no rollover, envelope transfer, or per-week budget in the current model; the period choices are daily and monthly.
+  </div>
+</section>
+
+<!-- ================= FINANCE TOOLS ================= -->
+<section class="section detail">
+  <div class="section-num">04 · Feature details</div>
+  <h2 class="section-title">Finance tools</h2>
+  <p class="lead">A hub for the money that is not a simple transaction: loans, recurring bills, shared costs, and monthly review.</p>
+
+  <p>The <b>Finance tools</b> page links four tools: Loans &amp; bills, Shared expenses, Monthly summary, and Backup &amp; export. Each opens a focused page with its own header and navigation back to the workspace.</p>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">20</span><h4>Loans to repay and money lent</h4><span class="chip">Implemented</span></div>
+    <p>Track two directions: “I need to repay” and “I lent money”. Each record stores the other person, principal, remaining balance, due date, and optional notes.</p>
+    <ul>
+      <li><b>Balance display:</b> remaining and principal, e.g. “৳700 remaining of ৳1,000 · due 2026-12-01”.</li>
+      <li><b>Independent ledger:</b> loan movements do <b>not</b> change the transaction history or current balance — by design.</li>
+      <li><b>Editing:</b> changing the principal preserves the amount already paid and recalculates the remaining balance.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">21</span><h4>Partial loan payments and settlement</h4><span class="chip">Implemented</span></div>
+    <p>A compact payment field accepts any valid amount up to the remaining balance. On update, the remaining balance drops, and the list refreshes immediately.</p>
+    <ul>
+      <li><b>Validation:</b> positive amount, at most two decimals, never more than what is owed.</li>
+      <li><b>Settlement:</b> at zero remaining, the reminder is cancelled and the payment field disappears.</li>
+      <li><b>Reminders:</b> rescheduled against the due date after a partial payment, if notifications are on.</li>
+      <li><b>Deletion:</b> removes the loan and cancels its scheduled reminder after confirmation.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">22</span><h4>Recurring bills</h4><span class="chip">Implemented</span></div>
+    <p>Repeat a bill weekly, monthly, or yearly with a name, amount, category, next due date, and a “remind me one day before” toggle.</p>
+    <ul>
+      <li><b>Monthly dates:</b> the 31st clamps correctly to shorter months; month-end bills stay at month-end.</li>
+      <li><b>Yearly dates:</b> February 29 becomes February 28 in non-leap years.</li>
+      <li><b>List view:</b> amount, frequency, next due date, and reminder state.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">23</span><h4>Mark bill paid</h4><span class="chip">Implemented</span></div>
+    <p>One action records the expense and moves the bill forward.</p>
+    <ul>
+      <li><b>Expense created:</b> type expense, the bill’s amount and category, description “Bill payment: &lt;name&gt;”, preferred payment method, current timestamp.</li>
+      <li><b>Next due date:</b> calculated strictly after today, advancing repeatedly if the bill is overdue.</li>
+      <li><b>Atomic local write:</b> the bill update and the transaction are queued together before syncing.</li>
+      <li><b>Reminder:</b> rescheduled for the new due date.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">24</span><h4>Shared expense splits</h4><span class="chip">Implemented</span></div>
+    <p>Split a cost with people identified only by name — they do not need SpendWise accounts and are not notified.</p>
+    <ul>
+      <li><b>Input:</b> title, total, and comma-separated participants (up to 100 other people).</li>
+      <li><b>Equal split:</b> the total is divided in integer paisa; any remainder is distributed one paisa at a time, so the shares always sum to the total.</li>
+      <li><b>Your share:</b> excluded from what others owe you; duplicates and your own display name are rejected.</li>
+      <li><b>Settlement:</b> each participant can be toggled “Settled” or “Mark settled”; outstanding is owed minus settled.</li>
+      <li><b>Privacy:</b> the split is a private record in your account, not a shared document.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">25</span><h4>Android local reminders</h4><span class="chip">Implemented</span></div>
+    <p>On Android, loans and recurring bills can schedule a device notification for about <b>9:00 AM the day before</b> the due date.</p>
+    <ul>
+      <li><b>Permission:</b> the app checks and requests notification permission; reminders cannot be scheduled without it.</li>
+      <li><b>Preference:</b> the global notification switch enables or disables all loan and bill reminders; each bill also has its own toggle.</li>
+      <li><b>Rescheduling:</b> saving, paying, editing, or deleting a record cancels and re-creates the relevant notification.</li>
+      <li><b>Boundary:</b> reminders only work in the native Android app; the web build does not deliver notifications, and Android may delay delivery.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= DATA & PERSONALIZATION ================= -->
+<section class="section detail">
+  <div class="section-num">04 · Feature details</div>
+  <h2 class="section-title">Data &amp; personalization</h2>
+  <p class="lead">Your records should be portable and the workspace should feel familiar. These features cover backup, restore, preferences, and identity.</p>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">26</span><h4>Full JSON backup export</h4><span class="chip">Implemented</span></div>
+    <p>“Export full backup” writes a structured JSON file containing the account ID, all transactions, budgets, loans, recurring bills, shared expense splits, and preferences.</p>
+    <ul>
+      <li><b>Format:</b> <span class="muted">{ format: "spendwise-backup", version: 1, data: { ... } }</span>, pretty-printed.</li>
+      <li><b>Delivery:</b> browser download on the web; cache file plus native share sheet on Android.</li>
+      <li><b>Clarity:</b> the page states that the file is not encrypted and should be stored privately.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">27</span><h4>Backup restore with validation and merge</h4><span class="chip">Implemented</span></div>
+    <p>Restore is deliberately strict and non-destructive.</p>
+    <ul>
+      <li><b>Schema validation:</b> checks the format marker, version, record shapes, UUIDs, dates, money limits, and allowed enum values before importing.</li>
+      <li><b>Account match:</b> the backup’s user ID must equal the signed-in account ID.</li>
+      <li><b>Merge by ID:</b> records whose IDs already exist are kept as-is; only new IDs are added. Nothing is overwritten or deleted.</li>
+      <li><b>Sync:</b> added records enter the pending queue and reach Supabase when online.</li>
+      <li><b>Reminders:</b> upcoming loan and bill reminders are re-scheduled, with a warning if permission or a future time is missing.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">28</span><h4>Settings and preferences</h4><span class="chip">Implemented</span></div>
+    <p>Preferences are saved to the profile, applied immediately, and synced like any other record.</p>
+    <ul>
+      <li><b>Currency:</b> BDT is shown and fixed; the app is single-currency by design.</li>
+      <li><b>Theme:</b> Light, Dark, or System. System follows the device’s colour-scheme preference live.</li>
+      <li><b>Week starts on:</b> Sunday or Monday.</li>
+      <li><b>Default daily budget:</b> the fallback used when no budgets exist.</li>
+      <li><b>Preferred payment method:</b> preselected in the transaction form.</li>
+      <li><b>Notification preference:</b> enables or disables loan and bill reminders.</li>
+      <li><b>Time zone:</b> Asia/Dhaka, UTC, Asia/Kolkata, Europe/London, or America/New_York. It controls daily/monthly boundaries and report dates.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">29</span><h4>Profile and sign-out</h4><span class="chip">Implemented</span></div>
+    <p>The profile page shows initials, the display name, a “Student account” label, and a small account form.</p>
+    <ul>
+      <li><b>Editable:</b> display name — saved to preferences and synced.</li>
+      <li><b>Read-only:</b> email address and preferred currency.</li>
+      <li><b>Navigation:</b> shortcut to Settings.</li>
+      <li><b>Sign out:</b> clears the local remembered account and workspace state, then returns to sign-in.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= PLATFORM & SUPPORT ================= -->
+<section class="section detail">
+  <div class="section-num">04 · Feature details</div>
+  <h2 class="section-title">Platform &amp; support</h2>
+  <p class="lead">The parts that make SpendWise feel like an app rather than a form: offline behavior, native integration, and human support pages.</p>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">30</span><h4>Offline-first storage and queued sync</h4><span class="chip">Implemented</span></div>
+    <p>Every account gets its own record in the <span class="muted">spendwise-offline</span> IndexedDB database. Reads come from this snapshot, and writes are applied locally before any network call.</p>
+    <ul>
+      <li><b>Optimistic UI:</b> creating, editing, or deleting a record updates the screen immediately.</li>
+      <li><b>Pending queue:</b> changes are stored with their account ID and replayed in order.</li>
+      <li><b>Sync triggers:</b> reconnecting, returning to the Android app, a 30-second retry while changes are pending, and the manual refresh button.</li>
+      <li><b>Remote refresh:</b> after flushing pending changes, the app pulls transactions, budgets, loans, bills, shared expenses, and the profile.</li>
+      <li><b>Account safety:</b> queued changes are scoped to one account; a different signed-in user cannot replay them.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">31</span><h4>Manual refresh</h4><span class="chip">Implemented</span></div>
+    <p>The refresh icon in the workspace top bar requests the latest cloud data. While offline it returns without changing local data; queued changes still synchronize automatically after reconnecting. A toast confirms success.</p>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">32</span><h4>Android native shell</h4><span class="chip">Implemented</span></div>
+    <p>The Capacitor wrapper adds the details that a browser tab cannot provide.</p>
+    <ul>
+      <li><b>Status bar and splash:</b> light status-bar style with the app’s cream background; configured splash screen.</li>
+      <li><b>Back button:</b> navigates history when possible; otherwise asks “Exit SpendWise?” before exiting.</li>
+      <li><b>External links:</b> http/https links outside the app origin open in the in-app browser.</li>
+      <li><b>Keyboard:</b> resize behavior configured for forms.</li>
+      <li><b>Share and files:</b> CSV and JSON exports write to cache and open the Android share sheet.</li>
+      <li><b>Deep links:</b> <span class="muted">spendwise://auth/confirm</span> routes to the confirmation page.</li>
+      <li><b>Network awareness:</b> native network status, rather than only browser events, drives sync.</li>
+    </ul>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">33</span><h4>Contact us</h4><span class="chip">Implemented</span></div>
+    <p>A support page for bug reports, account help, suggestions, or anything else. The form collects an optional name and email, a topic, and a message of 10–5,000 characters.</p>
+    <p>Submitting builds a <span class="muted">mailto:</span> link and opens the user’s email app with a draft. Nothing is sent by SpendWise itself, and the page says so. A direct email link is also shown as a fallback.</p>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">34</span><h4>About page</h4><span class="chip">Implemented</span></div>
+    <p>A personal page introducing the developer, Tamim Ahmed — a first-year BBA Honours student at Government Debendra College, Manikganj, and an aspiring developer. It includes a short story, education card, photographs, a motto, and a return link to the workspace.</p>
+  </div>
+
+  <div class="feature">
+    <div class="fh"><span class="fnum">35</span><h4>Notifications page (placeholder)</h4><span class="chip partial">Placeholder</span></div>
+    <p>The page exists and is reachable from settings, but it is an intentional empty state: “No notifications yet — notification delivery is not available yet.” It links back to notification preferences.</p>
+    <p class="small">Android loan and bill reminders are delivered locally and are separate from this in-app notification centre.</p>
+  </div>
+</section>
+
+<!-- ================= DATA MODEL & SECURITY ================= -->
+<section class="section">
+  <div class="section-num">05 · Storage &amp; protection</div>
+  <h2 class="section-title">Data model &amp; security</h2>
+  <p class="lead">Six PostgreSQL tables, each owned by exactly one authenticated user and protected by Row Level Security.</p>
+
+  <table class="compact">
+    <thead><tr><th style="width:18%">Table</th><th style="width:52%">What it stores</th><th>Ownership</th></tr></thead>
+    <tbody>
+      <tr><td><b>profiles</b></td><td>Display name, currency (BDT), default daily budget, theme, week start, preferred payment method, notification switch, time zone. Primary key equals the auth user ID.</td><td>Owner-only; 4 policies</td></tr>
+      <tr><td><b>transactions</b></td><td>Type (income/expense), amount numeric(12,2), category, subcategory, description, payment method, timestamp, notes, timestamps. Indexed by owner/date and owner/category/date.</td><td>Owner-only; 4 policies</td></tr>
+      <tr><td><b>budgets</b></td><td>Name, amount, period (daily/monthly), optional category, optional month (first day only), created/updated timestamps.</td><td>Owner-only; 4 policies</td></tr>
+      <tr><td><b>loans</b></td><td>Direction (repay/lent), person, principal, remaining (0 ≤ remaining ≤ principal), due date, notes.</td><td>Owner-only; 4 policies</td></tr>
+      <tr><td><b>recurring_bills</b></td><td>Name, amount, category, frequency (weekly/monthly/yearly), next due date, reminder flag.</td><td>Owner-only; 4 policies</td></tr>
+      <tr><td><b>shared_expenses</b></td><td>Title, total, paid-by name, shares as a JSONB array of <span class="muted">{name, amount, settled}</span>, created/updated timestamps.</td><td>Owner-only; 4 policies</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="first">Security controls in the code</h3>
+  <div class="grid-2">
+    <div class="card"><h4>Row Level Security everywhere</h4><p>RLS is enabled on all six tables. Select, insert, update, and delete are each governed by <span class="muted">auth.uid() = user_id</span>; updates and inserts also use <span class="muted">WITH CHECK</span> so a client-supplied owner cannot reassign a record.</p></div>
+    <div class="card"><h4>Server-assigned ownership</h4><p><span class="muted">user_id</span> defaults to <span class="muted">auth.uid()</span> at the database. Profiles use the auth user ID as their primary key. Ownership never comes from client metadata.</p></div>
+    <div class="card"><h4>Safe profile trigger</h4><p>A <span class="muted">SECURITY DEFINER</span> trigger with an empty search path creates the profile and copies only the name from sign-up metadata, truncated to 100 characters. Public execute permission is revoked.</p></div>
+    <div class="card"><h4>Database constraints</h4><p>Money is <span class="muted">numeric(12,2)</span>, amounts must be positive, loan remaining cannot exceed principal, enums are checked, and text lengths are bounded. Indexes support owner/date/category queries.</p></div>
+    <div class="card"><h4>No privileged key in the client</h4><p>The frontend uses the publishable/anon key only. A service-role or secret key would bypass RLS and is explicitly excluded from the setup instructions.</p></div>
+    <div class="card"><h4>Validated inputs and files</h4><p>Transactions and money are validated in the UI and data layer. CSV output guards against formula injection. Backup restore validates structure, IDs, dates, enums, and account ownership before merging.</p></div>
+  </div>
+
+  <h3>Money and time correctness</h3>
+  <p class="small" style="margin-bottom:3mm"><b>Paisa precision:</b> the client sums integer paisa and rounds only at the boundary. <b>Time zones:</b> daily/monthly boundaries, report dates, and transaction dates use the account’s chosen IANA zone, not the server or browser zone. <b>DST:</b> nonexistent daylight-saving wall times are rejected, while ambiguous fall-back times resolve to one valid offset. <b>Future records:</b> dashboard totals exclude transactions dated after “now”.</p>
+
+</section>
+
+<!-- ================= OFFLINE ================= -->
+<section class="section">
+  <div class="section-num">06 · Local-first behavior</div>
+  <h2 class="section-title">Offline-first &amp; sync</h2>
+  <p class="lead">SpendWise writes locally first, then syncs. The app never blocks an edit on a network request, and it does not show an offline warning.</p>
+
+  <h3 class="first">The write path</h3>
+  <div class="steps">
+    <div class="step"><b>Read the local snapshot</b> The account’s IndexedDB state is the source of truth for the current session.</div>
+    <div class="step"><b>Apply the change locally</b> The new record, edit, or deletion is merged into the snapshot and written back to IndexedDB.</div>
+    <div class="step"><b>Publish to the UI</b> React state updates immediately, so the dashboard, lists, and totals reflect the change.</div>
+    <div class="step"><b>Queue the change</b> A pending change with the account ID and operation type is appended to the queue.</div>
+    <div class="step"><b>Sync when possible</b> If online, the queue is replayed in order through Supabase. Each success removes that change from the queue.</div>
+    <div class="step"><b>Refresh from the cloud</b> After the queue empties, the app pulls the latest records and profile, then reapplies any remaining pending changes.</div>
+  </div>
+
+  <h3>Behavior by situation</h3>
+  <table class="compact">
+    <thead><tr><th style="width:24%">Situation</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td><b>Online edit</b></td><td>Shown instantly; queued; synced in the background. A toast may confirm the action.</td></tr>
+      <tr><td><b>Offline edit</b></td><td>Shown instantly; queued; no offline warning. Data remains available after closing and reopening the app.</td></tr>
+      <tr><td><b>Reconnect / app resumed</b></td><td>The online listener, native network listener, or Android app-state listener triggers sync. A 30-second retry runs while changes are pending.</td></tr>
+      <tr><td><b>Manual refresh</b></td><td>Online: flushes pending changes, then pulls cloud data. Offline: leaves local data untouched.</td></tr>
+      <tr><td><b>Sign out</b></td><td>Clears the remembered account and in-memory data. The cached snapshot remains on the device unless app data is cleared.</td></tr>
+      <tr><td><b>First sign-in</b></td><td>Requires internet. Offline access only works after a previous successful sign-in and cache.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Conflict and data-safety boundaries</h3>
+  <ul class="small" style="margin-left:4.5mm;padding:0">
+    <li style="margin-bottom:1.5mm"><b>Pending changes win locally:</b> remote data is loaded, then pending operations are reapplied so the local view stays consistent until sync finishes.</li>
+    <li style="margin-bottom:1.5mm"><b>Account isolation:</b> pending changes carry a user ID and cannot be replayed into a different account.</li>
+    <li style="margin-bottom:1.5mm"><b>No real-time multi-tab sync:</b> two open tabs do not update each other automatically. Reload or use refresh to see another session’s changes.</li>
+    <li><b>Not encrypted locally:</b> IndexedDB data and exported backups are plain. Clearing app data removes cached records, including changes that have not synced.</li>
+  </ul>
+</section>
+
+<!-- ================= ANDROID ================= -->
+<section class="section">
+  <div class="section-num">07 · Mobile delivery</div>
+  <h2 class="section-title">Android distribution</h2>
+  <p class="lead">The Android app is a Capacitor wrapper around a static Next.js export. The website and the APK share the same UI and data layer.</p>
+
+  <h3 class="first">Build pipeline</h3>
+  <div class="flow">
+    <div class="flow-node"><b>1. Static export</b><span><span class="muted">npm run build:android</span><br>CAPACITOR_BUILD=1 → <span class="muted">out/</span></span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><b>2. Sync</b><span><span class="muted">npx cap sync android</span><br>copies web assets + plugins</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><b>3. Gradle build</b><span>Android Studio or <span class="muted">gradlew assembleDebug</span></span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node"><b>4. APK</b><span><span class="muted">android/app/build/outputs/apk/</span></span></div>
+  </div>
+
+  <div class="grid-2" style="margin-top:4mm">
+    <div class="card"><h4>Project configuration</h4><p>Application ID <span class="muted">com.yourdomain.spendwise</span>, minimum SDK 24, target SDK 36. Build with Java 21 (Android Studio’s bundled JBR is suitable). Change the application ID before publishing under your own domain.</p></div>
+    <div class="card"><h4>Supabase redirects</h4><p>Add <span class="muted">https://YOUR-DOMAIN/auth/confirm</span>, <span class="muted">https://YOUR-DOMAIN/auth/callback</span>, and <span class="muted">spendwise://auth/confirm</span> to the redirect allow list. Set the Site URL to the deployed website origin.</p></div>
+    <div class="card"><h4>Release signing</h4><p>Build a signed release APK or Android App Bundle with a keystore stored outside the repository. Keep the same signing key for every update and increment <span class="muted">versionCode</span>.</p></div>
+    <div class="card"><h4>Device test checklist</h4><p>Install and launch, sign up, confirm email, sign in, restart, sign out; test offline edits and reconnect; test reminders, CSV sharing, deep links, back navigation, and keyboard behavior.</p></div>
+  </div>
+
+  <h3>What is native, and what is not</h3>
+  <table class="compact">
+    <thead><tr><th style="width:38%">Capability</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td><b>Local reminders</b></td><td>Native Android local notifications, scheduled about 9:00 AM the day before. Requires permission; OS may delay delivery.</td></tr>
+      <tr><td><b>Share sheet</b></td><td>CSV and JSON exports are written to the app cache and shared through Android’s share dialog.</td></tr>
+      <tr><td><b>Deep-link confirmation</b></td><td><span class="muted">spendwise://auth/confirm</span> is handled by the native runtime and forwarded to the web confirmation page.</td></tr>
+      <tr><td><b>Status bar / splash / keyboard</b></td><td>Configured through Capacitor plugins; light status bar style and a cream splash background.</td></tr>
+      <tr><td><b>External links</b></td><td>Non-app http/https links open in the in-app browser instead of replacing the app.</td></tr>
+      <tr><td><b>Push notifications</b></td><td>Not implemented. Reminders are local-only. There is no server push or in-app notification feed.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <b>Remember:</b> a website deployment does not update an installed APK. After frontend changes, rebuild the static export, run <span class="muted">npx cap sync android</span>, and produce a new APK. Test on a physical device before sharing.
+  </div>
+</section>
+
+<!-- ================= QUALITY ================= -->
+<section class="section">
+  <div class="section-num">08 · Verification</div>
+  <h2 class="section-title">Quality &amp; testing</h2>
+  <p class="lead">Eight Vitest suites protect the calculations, date handling, offline replay, backup format, and policy declarations. Type checking, linting, and a production build complete the checks.</p>
+
+  <table class="compact">
+    <thead><tr><th style="width:28%">Test suite</th><th>What it verifies</th></tr></thead>
+    <tbody>
+      <tr><td><b>calculations.test.ts</b></td><td>Income/expense separation, paisa precision, current balance, empty totals, future transactions excluded, time-zone date boundaries, DST rejection, amount validation.</td></tr>
+      <tr><td><b>finance-utils.test.ts</b></td><td>Equal cent-safe splitting, weekly/monthly/yearly bill advancement across month-end and leap years, 9 AM prior-day reminder time, five-field search, calendar month bounds, outstanding split balance, merge without overwriting IDs.</td></tr>
+      <tr><td><b>offline-storage.test.ts</b></td><td>Offline creates/edits/deletes, pending queue replay, account scoping, immediate local reflection, loans/bills/shared expenses in the queue.</td></tr>
+      <tr><td><b>backup.test.ts</b></td><td>Backup creation, parsing, account mismatch rejection, merge-by-ID behavior.</td></tr>
+      <tr><td><b>budget-overview.test.ts</b></td><td>Latest-budget selection, fallback ordering, daily category spending, monthly spending, future exclusion.</td></tr>
+      <tr><td><b>auth-routing.test.ts</b></td><td>Private route detection, login redirect targets, offline session restore conditions, session timeout behavior.</td></tr>
+      <tr><td><b>contact.test.ts</b></td><td>Mailto construction and contact address handling.</td></tr>
+      <tr><td><b>rls.test.ts</b></td><td>Static check that all tables enable RLS and declare select/insert/update/delete policies; profile trigger name handling; finance table policies.</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="first">Commands</h3>
+  <div class="grid-4">
+    <div class="card tint"><h4>Type check</h4><p><span class="muted">npm run typecheck</span></p></div>
+    <div class="card tint"><h4>Lint</h4><p><span class="muted">npm run lint</span></p></div>
+    <div class="card tint"><h4>Tests</h4><p><span class="muted">npm test</span></p></div>
+    <div class="card tint"><h4>Build</h4><p><span class="muted">npm run build</span></p></div>
+  </div>
+
+  <h3>What automated tests do not cover</h3>
+  <ul class="small" style="margin-left:4.5mm;padding:0">
+    <li style="margin-bottom:1.5mm">Live Supabase signup, email delivery, session refresh, and database CRUD.</li>
+    <li style="margin-bottom:1.5mm">Real Row Level Security behavior with two accounts — the SQL test reads the migration and checks that policies exist, but does not execute them.</li>
+    <li style="margin-bottom:1.5mm">Native Android behavior: notification delivery, share sheet, deep links, keyboard, and back navigation.</li>
+    <li><b>Recommendation:</b> run the two-account RLS exercise and the device checklist in <span class="muted">ANDROID_SETUP.md</span> before using real financial data or distributing an APK.</li>
+  </ul>
+</section>
+
+<!-- ================= LIMITATIONS ================= -->
+<section class="section">
+  <div class="section-num">09 · Honest scope</div>
+  <h2 class="section-title">Limitations &amp; next steps</h2>
+  <p class="lead">The app is coherent and usable, but it is not a finished commercial product. These boundaries are deliberate and documented in the repository.</p>
+
+  <h3 class="first">Current limitations</h3>
+  <table class="compact">
+    <thead><tr><th style="width:27%">Area</th><th style="width:16%">Status</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><b>Password reset</b></td><td><span class="chip done">Implemented</span></td><td>Users can request a recovery email and set a new password. Supabase redirect URLs and email delivery must be configured.</td></tr>
+      <tr><td><b>Account deletion</b></td><td><span class="chip partial">Implemented; deploy required</span></td><td>The profile flow calls a token-verified Edge Function to erase receipt files, cloud rows, and the auth user. Deploy the function and configure its server-side secret.</td></tr>
+      <tr><td><b>Email change</b></td><td><span class="chip done">Implemented</span></td><td>Authenticated users can request an email change, which takes effect after confirmation at the new address.</td></tr>
+      <tr><td><b>OAuth / social sign-in</b></td><td><span class="chip partial">Google; configure required</span></td><td>Google sign-in is wired for web and Android deep links; enable the provider and configure OAuth credentials and redirect URLs in Supabase.</td></tr>
+      <tr><td><b>In-app notifications</b></td><td><span class="chip partial">Budget alerts</span></td><td>A persistent feed records daily and category budget threshold alerts with read/unread state. Due-date and sync-error feed items are not generated.</td></tr>
+      <tr><td><b>Push notifications</b></td><td><span class="chip none">Not implemented</span></td><td>Only local Android reminders for loans and bills.</td></tr>
+      <tr><td><b>Real-time multi-tab sync</b></td><td><span class="chip partial">Implemented; configure required</span></td><td>Open sessions refresh their data from Supabase Realtime. Enable the migration's publication entries and use refresh if the channel is unavailable.</td></tr>
+      <tr><td><b>Encrypted local data / backups</b></td><td><span class="chip partial">Encrypted backups</span></td><td>Full JSON exports use AES-GCM and a user passphrase; local IndexedDB snapshots remain unencrypted.</td></tr>
+      <tr><td><b>Multi-currency</b></td><td><span class="chip none">Not implemented</span></td><td>BDT only, by design and database constraint.</td></tr>
+      <tr><td><b>Receipt attachments</b></td><td><span class="chip partial">Implemented; migration required</span></td><td>Transactions can attach private JPG, PNG, WebP, or PDF receipts up to 5 MB in Supabase Storage.</td></tr>
+      <tr><td><b>Recurring income</b></td><td><span class="chip done">Implemented</span></td><td>Recurring items can be income or expenses and create the matching transaction when recorded.</td></tr>
+      <tr><td><b>Shared expense invitations</b></td><td><span class="chip partial">Partial by design</span></td><td>Participants are names only; they are not invited or notified and need no account.</td></tr>
+      <tr><td><b>Loan and transaction link</b></td><td><span class="chip done">Implemented</span></td><td>Recording a loan payment updates its remaining balance and creates a linked income or expense transaction.</td></tr>
+      <tr><td><b>Live RLS automation</b></td><td><span class="chip partial">Runnable test</span></td><td><span class="muted">npm run test:rls:live</span> exercises owner isolation with two ordinary accounts; test credentials and a configured Supabase project are required.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Suggested next steps</h3>
+  <div class="grid-3">
+    <div class="card"><h4>Account operations</h4><p>Deploy and test account deletion, configure Google OAuth, and verify recovery/email-confirmation templates on web and Android.</p></div>
+    <div class="card"><h4>Sync conflict handling</h4><p>Add version-based conflict detection so concurrent offline edits from multiple devices cannot silently overwrite one another.</p></div>
+    <div class="card"><h4>Privacy hardening</h4><p>Encrypt local IndexedDB snapshots and add an app lock or biometric gate; encrypted exports are available now.</p></div>
+    <div class="card"><h4>Notifications & sharing</h4><p>Add due-date and sync-error feed items, configure remote push delivery, and invite shared-expense participants by email.</p></div>
+    <div class="card"><h4>Reporting depth</h4><p>Add trend lines across months, income-vs-expense history, budget-vs-actual charts, and a printable PDF report.</p></div>
+    <div class="card"><h4>Multi-currency</h4><p>Add transaction currency selection, reliable exchange-rate conversion, and consistent reporting in a chosen base currency.</p></div>
+  </div>
+
+</section>
+
+<!-- ================= QUICK START ================= -->
+<section class="section">
+  <div class="section-num">10 · Run it yourself</div>
+  <h2 class="section-title">Quick start</h2>
+  <p class="lead">From a fresh clone to a running workspace, plus the commands for the Android build.</p>
+
+  <h3 class="first">Web setup</h3>
+  <div class="steps">
+    <div class="step"><b>Install dependencies</b> Node.js 22 or newer, then <span class="muted">npm ci</span>.</div>
+    <div class="step"><b>Create a Supabase project</b> Wait for the database to be ready, then apply the three migrations in order: <span class="muted">20261030000000_initial.sql</span>, <span class="muted">20261030000001_profile_names.sql</span>, <span class="muted">20261104000000_finance_features.sql</span>.</div>
+    <div class="step"><b>Add environment variables</b> Create <span class="muted">.env.local</span> with <span class="muted">NEXT_PUBLIC_SUPABASE_URL</span> and <span class="muted">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>. Use the publishable/anon key — never a service-role key.</div>
+    <div class="step"><b>Configure auth URLs</b> Set the Site URL and allow <span class="muted">/auth/confirm</span>, <span class="muted">/auth/callback</span>, and <span class="muted">spendwise://auth/confirm</span> as redirects. For cross-device confirmation emails, use a token-hash link to <span class="muted">/auth/confirm</span>.</div>
+    <div class="step"><b>Run and verify</b> <span class="muted">npm run dev</span>, open the landing page, create an account, confirm the email if enabled, and sign in. Then run <span class="muted">npm run typecheck</span>, <span class="muted">npm run lint</span>, <span class="muted">npm test</span>, and <span class="muted">npm run build</span>.</div>
+  </div>
+
+  <h3>Android build</h3>
+  <div class="card tint" style="margin-bottom:3mm">
+    <p style="font-family:Consolas,monospace;font-size:8.6pt;color:var(--green);line-height:1.9;margin:0">
+      npm run build:android<br>
+      npx cap sync android<br>
+      npx cap open android<br>
+      # then Build &gt; Build APK(s), or:<br>
+      Push-Location android; .\gradlew.bat assembleDebug; Pop-Location
+    </p>
+  </div>
+  <p class="small">The debug APK is written to <span class="muted">android\app\build\outputs\apk\debug\app-debug.apk</span>. Use a signed release build for distribution; do not distribute a debug APK.</p>
+
+  <h3>Environment contract</h3>
+  <table class="compact">
+    <thead><tr><th style="width:38%">Variable</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><b>NEXT_PUBLIC_SUPABASE_URL</b></td><td>The Supabase project URL. Public by design.</td></tr>
+      <tr><td><b>NEXT_PUBLIC_SUPABASE_ANON_KEY</b></td><td>The publishable or legacy anon key. Public by design; RLS enforces access.</td></tr>
+      <tr><td><b>CAPACITOR_BUILD</b></td><td>Set to <span class="muted">1</span> by the Android build script to produce a static export.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout green">
+    <b>Default new-account state:</b> empty transactions and budgets, a ৳300 daily budget, Asia/Dhaka time zone, system theme, cash as the preferred payment method, and notifications enabled. Add an income through the transaction form to give the account a balance.
+  </div>
+
+</section>
+
+</body>
+</html>

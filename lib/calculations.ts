@@ -1,0 +1,13 @@
+import {Budget,Transaction} from '../types'; import {dateKey,today} from './date-utils';
+export const totalIncome=(t:Transaction[])=>t.filter(x=>x.type==='income').reduce((a,x)=>a+Math.round(x.amount*100),0)/100;
+export const totalExpenses=(t:Transaction[])=>t.filter(x=>x.type==='expense').reduce((a,x)=>a+Math.round(x.amount*100),0)/100;
+export const currentBalance=(t:Transaction[])=>(Math.round(totalIncome(t)*100)-Math.round(totalExpenses(t)*100))/100;
+export const todaysExpenses=(t:Transaction[],day=today())=>totalExpenses(t.filter(x=>dateKey(x.date)===day&&new Date(x.date)<=new Date()));
+export const budgetRemaining=(budget:number,spent:number)=>(Math.round(budget*100)-Math.round(spent*100))/100;
+export const monthlyExpenses=(t:Transaction[],day=today())=>totalExpenses(t.filter(x=>dateKey(x.date).slice(0,7)===day.slice(0,7)&&new Date(x.date)<=new Date()));
+export const spendingByCategory=(t:Transaction[])=>Object.entries(t.filter(x=>x.type==='expense').reduce<Record<string,number>>((a,x)=>{a[x.category]=((Math.round((a[x.category]||0)*100)+Math.round(x.amount*100))/100);return a},{})).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value);
+export const averageDaily=(t:Transaction[],days:number)=>days>0?totalExpenses(t)/days:0;
+export const budgetPercent=(spent:number,amount:number)=>amount>0?spent/amount*100:0;
+export const latestBudget=(budgets:Budget[])=>budgets.reduce<Budget|undefined>((latest,budget)=>{if(!latest)return budget;const latestCreated=latest.createdAt?Date.parse(latest.createdAt):Number.NEGATIVE_INFINITY;const budgetCreated=budget.createdAt?Date.parse(budget.createdAt):Number.NEGATIVE_INFINITY;return budgetCreated>=latestCreated?budget:latest},undefined);
+export const budgetSpending=(budget:Budget,transactions:Transaction[],day:string,now=new Date())=>totalExpenses(transactions.filter(t=>{const key=dateKey(t.date);return new Date(t.date)<=now&&(!budget.category||t.category===budget.category)&&(budget.period==='daily'?key===day:key.slice(0,7)===day.slice(0,7)&&key<=day)}));
+export const money=(n:number)=>`${n<0?'-':''}৳${Math.abs(n).toLocaleString('en-BD',{maximumFractionDigits:2})}`;
