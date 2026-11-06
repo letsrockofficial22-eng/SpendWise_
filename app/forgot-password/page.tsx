@@ -19,13 +19,12 @@ export default function ForgotPasswordPage(){
     try{
       const redirectTo=Capacitor.isNativePlatform()
         ?'spendwise://auth/callback?next=%2Fauth%2Freset-password'
-        :`${window.location.origin}/auth/callback?next=%2Fauth%2Freset-password`;
+        :`${window.location.origin}/auth/reset-password`;
       const {error}=await browserClient().auth.resetPasswordForEmail(email,{redirectTo});
       if(error)throw error;
       setMessage('If an account exists for that email, a password reset link is on its way.');
     }catch(cause){
-      setError(cause instanceof Error&&cause.message.includes('not configured')
-        ?cause.message:'Could not request a password reset. Please try again.');
+      setError(cause instanceof Error?cause.message:'Could not request a password reset. Please try again.');
     }finally{
       setBusy(false);
     }

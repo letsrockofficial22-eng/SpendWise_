@@ -16,13 +16,37 @@ export default function ResetPasswordPage(){
 
   useEffect(()=>{
     let active=true;
-    void browserClient().auth.getSession().then(({data,error:sessionError})=>{
-      if(!active)return;
-      if(sessionError||!data.session)setError('This password reset link is invalid or has expired. Request a new one and try again.');
-      else setReady(true);
-    }).catch(cause=>{
-      if(active)setError(cause instanceof Error?cause.message:'Could not validate this password reset link.');
-    });
+    async function validateResetLink(){
+      try{
+        const client=browserClient();
+        const params=new URLSearchParams(window.location.search);
+        const code=params.get('code');
+        const tokenHash=params.get('token_hash');
+        const type=params.get('type');
+        const hash=new URLSearchParams(window.location.hash.replace(/^#/,''));
+        if(code){
+          const {error}=await client.auth.exchangeCodeForSession(code);
+          if(error)throw error;
+        }else if(tokenHash&&type==='recovery'){
+          const {error}=await client.auth.verifyOtp({token_hash:tokenHash,type:'recovery'});
+          if(error)throw error;
+        }else if(hash.get('access_token')&&hash.get('refresh_token')){
+          const {error}=await client.auth.setSession({
+            access_token:hash.get('access_token')!,
+            refresh_token:hash.get('refresh_token')!,
+          });
+          if(error)throw error;
+        }
+        const {data,error}=await client.auth.getSession();
+        if(error)throw error;
+        if(!active)return;
+        if(!data.session)setError('This password reset link is invalid or has expired. Request a new one and try again.');
+        else setReady(true);
+      }catch(cause){
+        if(active)setError(cause instanceof Error?cause.message:'Could not validate this password reset link.');
+      }
+    }
+    void validateResetLink();
     return()=>{active=false};
   },[]);
 

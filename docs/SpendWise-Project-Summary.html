@@ -851,7 +851,7 @@
 
   <div class="grid-2" style="margin-top:4mm">
     <div class="card"><h4>Project configuration</h4><p>Application ID <span class="muted">com.yourdomain.spendwise</span>, minimum SDK 24, target SDK 36. Build with Java 21 (Android Studio’s bundled JBR is suitable). Change the application ID before publishing under your own domain.</p></div>
-    <div class="card"><h4>Supabase redirects</h4><p>Add <span class="muted">https://YOUR-DOMAIN/auth/confirm</span>, <span class="muted">https://YOUR-DOMAIN/auth/callback</span>, and <span class="muted">spendwise://auth/confirm</span> to the redirect allow list. Set the Site URL to the deployed website origin.</p></div>
+    <div class="card"><h4>Supabase redirects</h4><p>Add <span class="muted">https://YOUR-DOMAIN/auth/confirm</span>, <span class="muted">https://YOUR-DOMAIN/auth/callback</span>, <span class="muted">https://YOUR-DOMAIN/auth/reset-password</span>, and <span class="muted">spendwise://auth/confirm</span> to the redirect allow list. Set the Site URL to the deployed website origin.</p></div>
     <div class="card"><h4>Release signing</h4><p>Build a signed release APK or Android App Bundle with a keystore stored outside the repository. Keep the same signing key for every update and increment <span class="muted">versionCode</span>.</p></div>
     <div class="card"><h4>Device test checklist</h4><p>Install and launch, sign up, confirm email, sign in, restart, sign out; test offline edits and reconnect; test reminders, CSV sharing, deep links, back navigation, and keyboard behavior.</p></div>
   </div>
@@ -961,7 +961,7 @@
     <div class="step"><b>Install dependencies</b> Node.js 22 or newer, then <span class="muted">npm ci</span>.</div>
     <div class="step"><b>Create a Supabase project</b> Wait for the database to be ready, then apply the three migrations in order: <span class="muted">20261030000000_initial.sql</span>, <span class="muted">20261030000001_profile_names.sql</span>, <span class="muted">20261104000000_finance_features.sql</span>.</div>
     <div class="step"><b>Add environment variables</b> Create <span class="muted">.env.local</span> with <span class="muted">NEXT_PUBLIC_SUPABASE_URL</span> and <span class="muted">NEXT_PUBLIC_SUPABASE_ANON_KEY</span>. Use the publishable/anon key — never a service-role key.</div>
-    <div class="step"><b>Configure auth URLs</b> Set the Site URL and allow <span class="muted">/auth/confirm</span>, <span class="muted">/auth/callback</span>, and <span class="muted">spendwise://auth/confirm</span> as redirects. For cross-device confirmation emails, use a token-hash link to <span class="muted">/auth/confirm</span>.</div>
+    <div class="step"><b>Configure auth URLs</b> Set the Site URL and allow <span class="muted">/auth/confirm</span>, <span class="muted">/auth/callback</span>, <span class="muted">/auth/reset-password</span>, and <span class="muted">spendwise://auth/confirm</span> as redirects. For cross-device confirmation emails, use a token-hash link to <span class="muted">/auth/confirm</span>.</div>
     <div class="step"><b>Run and verify</b> <span class="muted">npm run dev</span>, open the landing page, create an account, confirm the email if enabled, and sign in. Then run <span class="muted">npm run typecheck</span>, <span class="muted">npm run lint</span>, <span class="muted">npm test</span>, and <span class="muted">npm run build</span>.</div>
   </div>
 
